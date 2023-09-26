@@ -5,6 +5,7 @@ import { Message } from "../message.model";
 import { MessagesService } from "../messages.service";
 import { FormBuilder } from "@angular/forms";
 
+
 @Component({
   selector: "app-chat-page",
   templateUrl: "./chat-page.component.html",
@@ -67,6 +68,6 @@ export class ChatPageComponent implements OnInit, OnDestroy {
   }
 
   onLogout() {
-    // À faire
+    this.authenticationService.logout();
   }
 }
