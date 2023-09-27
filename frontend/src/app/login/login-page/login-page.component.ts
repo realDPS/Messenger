@@ -16,6 +16,7 @@ export class LoginPageComponent implements OnInit {
   onLogin(UserCredentials: UserCredentials) {
     // Recoit les données de l'évenement login.
     console.log("Données du Login:", UserCredentials);
+    this.as.login(UserCredentials);
     this.router.navigate(["/chat"]);
   }
 }

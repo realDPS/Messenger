@@ -4,7 +4,7 @@ import { LoginPageComponent } from "./login/login-page/login-page.component";
 import { ChatPageComponent } from "./chat/chat-page/chat-page.component";
 
 const routes: Routes = [
-  { path: "chat", component: ChatPageComponent }, //ADDED
+  { path: "chat", component: ChatPageComponent }, // Route vers le chat.
   { path: "**", component: LoginPageComponent },
 ];
 

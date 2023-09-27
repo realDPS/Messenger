@@ -21,7 +21,7 @@ export class LoginFormComponent implements OnInit {
   ngOnInit(): void {}
 
   onLogin() {
-    // Prend les valeurs du formulaire.  
+    // Prend les valeurs du formulaire.
     const UserCredentials = this.loginForm.value as UserCredentials;
     // Émet l'évenement login.
     this.login.emit(UserCredentials);

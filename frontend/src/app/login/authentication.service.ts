@@ -11,7 +11,7 @@ export class AuthenticationService {
 
   private username = new BehaviorSubject<string | null>(null);
 
-  constructor(private routeur: Router) {
+  constructor(private router: Router) {
     this.username.next(localStorage.getItem(AuthenticationService.KEY));
   }
 
@@ -25,10 +25,11 @@ export class AuthenticationService {
   }
 
   logout() {
-    if (this.username.value !== null)
+    if (this.username.value !== null) {
       localStorage.removeItem(AuthenticationService.KEY);
+    }
     this.username.next(null);
-    this.routeur.navigate(["/LOGOUT"]);
+    this.router.navigate(["/login"]);
   }
 
   getUsername(): Observable<string | null> {
