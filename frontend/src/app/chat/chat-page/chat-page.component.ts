@@ -52,17 +52,6 @@ export class ChatPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  onPublishMessage() {
-    if (this.username && this.messageForm.valid && this.messageForm.value.msg) {
-      this.messagesService.postMessage({
-        text: this.messageForm.value.msg,
-        username: this.username,
-        timestamp: Date.now(),
-      });
-    }
-    this.messageForm.reset();
-  }
-
   /** Afficher la date seulement si la date du message précédent est différente du message courant. */
 
   onLogout() {

@@ -4,9 +4,6 @@
   </div>
   <div class="chat-messages">
     <app-messages [messages]="messages"></app-messages>
-    <form (ngSubmit)="onPublishMessage()" [formGroup]="messageForm">
-      <input name="message" type="text" formControlName="msg" />
-      <button type="submit">></button>
-    </form>
+    <app-new-message-form></app-new-message-form>
   </div>
 </div>

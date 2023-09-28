@@ -28,11 +28,3 @@
 p {
   margin: 10px;
 }
-
-form {
-  display: flex;
-}
-
-input[type="text"] {
-  flex: 1;
-}
