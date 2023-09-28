@@ -16,13 +16,7 @@
   border-style: solid;
   border-width: 1px;
   width: 60vw;
-}
 
-.messages {
-  height: 70vh;
-  overflow-y: scroll;
-  text-align: left;
-  padding: 30px;
 }
 
 p {
