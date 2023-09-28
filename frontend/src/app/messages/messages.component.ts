@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { Message } from '../chat/message.model';
 
 @Component({
@@ -8,8 +8,25 @@ import { Message } from '../chat/message.model';
 })
 export class MessagesComponent {
 
-  @Input() messages: Message[] = [];
+  @ViewChild('chatContainer') private myScrollContainer!: ElementRef;
 
+  ngOnInit() { 
+      this.scrollToBottom();
+  }
+
+  ngAfterViewChecked() {        
+      this.scrollToBottom();        
+  } 
+
+  scrollToBottom(): void {
+      try {
+          this.myScrollContainer.nativeElement.scrollTop = this.myScrollContainer.nativeElement.scrollHeight;
+      } catch(err) { }                 
+  }
+
+  
+  @Input() messages: Message[] = [];
+  
    /** Afficher la date seulement si la date du message précédent est différente du message courant. */
    showDateHeader(messages: Message[] | null, i: number) {
     if (messages != null) {
