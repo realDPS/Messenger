@@ -1,4 +1,9 @@
 <form (ngSubmit)="onPublishMessage()" [formGroup]="messageForm">
-    <input name="message" type="text" formControlName="msg" />
-    <button type="submit">></button>
-  </form>
+  <mat-form-field appearance="fill">
+    <input name="message" type="text" matInput formControlName="msg" placeholder="Enter your message" />
+  </mat-form-field>
+  <button mat-icon-button type="submit">
+    <mat-icon>rocket_launch</mat-icon>
+  </button>
+</form>
+  

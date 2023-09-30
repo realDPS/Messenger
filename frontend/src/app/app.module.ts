@@ -7,8 +7,13 @@ import { AppComponent } from "./app.component";
 import { LoginPageComponent } from "./login/login-page/login-page.component";
 import { LoginFormComponent } from "./login/login-form/login-form.component";
 import { ChatPageComponent } from "./chat/chat-page/chat-page.component";
-import { MessagesComponent } from './messages/messages.component';
-import { NewMessageFormComponent } from './new-message-form/new-message-form.component';
+import { MessagesComponent } from "./messages/messages.component";
+import { NewMessageFormComponent } from "./new-message-form/new-message-form.component";
+import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
+import { MatInputModule } from "@angular/material/input";
+import { MatButtonModule } from "@angular/material/button";
+import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatIconModule } from "@angular/material/icon";
 
 @NgModule({
   declarations: [
@@ -19,7 +24,16 @@ import { NewMessageFormComponent } from './new-message-form/new-message-form.com
     MessagesComponent,
     NewMessageFormComponent,
   ],
-  imports: [BrowserModule, AppRoutingModule, ReactiveFormsModule],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    ReactiveFormsModule,
+    BrowserAnimationsModule,
+    MatInputModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatIconModule,
+  ],
   providers: [],
   bootstrap: [AppComponent],
 })
