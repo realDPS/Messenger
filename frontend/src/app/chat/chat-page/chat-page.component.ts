@@ -52,8 +52,6 @@ export class ChatPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  /** Afficher la date seulement si la date du message précédent est différente du message courant. */
-
   onLogout() {
     // Déconnecte.
     this.authenticationService.logout();

@@ -1,13 +1,13 @@
-import { Component } from '@angular/core';
-import { FormBuilder } from '@angular/forms';
-import { MessagesService } from '../chat/messages.service';
-import { Subscription } from 'rxjs';
-import { AuthenticationService } from '../login/authentication.service';
+import { Component } from "@angular/core";
+import { FormBuilder } from "@angular/forms";
+import { MessagesService } from "../chat/messages.service";
+import { Subscription } from "rxjs";
+import { AuthenticationService } from "../login/authentication.service";
 
 @Component({
-  selector: 'app-new-message-form',
-  templateUrl: './new-message-form.component.html',
-  styleUrls: ['./new-message-form.component.css']
+  selector: "app-new-message-form",
+  templateUrl: "./new-message-form.component.html",
+  styleUrls: ["./new-message-form.component.css"],
 })
 export class NewMessageFormComponent {
   username$ = this.authenticationService.getUsername();
@@ -30,7 +30,7 @@ export class NewMessageFormComponent {
   }
 
   onPublishMessage() {
-    if (this.username && this.messageForm.valid) { 
+    if (this.username && this.messageForm.valid) {
       this.messagesService.postMessage({
         text: this.messageForm.value.msg as string,
         username: this.username,
