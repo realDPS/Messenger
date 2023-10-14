@@ -2,6 +2,10 @@ import { Injectable } from "@angular/core";
 import { BehaviorSubject, Observable } from "rxjs";
 import { UserCredentials } from "./model/user-credentials";
 import { Router } from "@angular/router";
+import { HttpClient } from "@angular/common/http";
+import { firstValueFrom } from "rxjs";
+import { LoginResponse } from "../interfaces/login-response";
+import { environment } from "src/environments/environment";
 
 @Injectable({
   providedIn: "root",
@@ -11,17 +15,29 @@ export class AuthenticationService {
 
   private username = new BehaviorSubject<string | null>(null);
 
-  constructor(private router: Router) {
+  constructor(private router: Router, private http: HttpClient) {
     this.username.next(localStorage.getItem(AuthenticationService.KEY));
   }
 
-  login(userCredentials: UserCredentials) {
-    // Prend le username de userCredentials.
-    const username = userCredentials.username;
-    // Met le username dans localStorage.
-    localStorage.setItem(AuthenticationService.KEY, username);
-    // Met à jour le username.
-    this.username.next(username);
+  async login(userCredentials: UserCredentials) {
+    try {
+      // Requête HTTP au backend.
+      const response = await firstValueFrom(
+        this.http.post<LoginResponse>(
+          `${environment.backendUrl}/auth/login`,
+          userCredentials,
+          { withCredentials: true }
+        )
+      );
+      // Prend le session ID de la réponse.
+      const sessionId = response.sid;
+      localStorage.setItem(AuthenticationService.KEY, sessionId);
+      // Met à jour le username.
+      this.username.next(userCredentials.username);
+    } catch (error) {
+      // Message d'erreur.
+      console.error("Erreur du login", error);
+    }
   }
 
   logout() {
