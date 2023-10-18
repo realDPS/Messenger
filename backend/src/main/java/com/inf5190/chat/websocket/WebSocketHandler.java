@@ -21,12 +21,14 @@ public class WebSocketHandler extends TextWebSocketHandler {
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         // Sur une nouvelle connexion, on ajoute la session au websocket manager.
         this.webSocketManager.addSession(session);
+        this.webSocketManager.notifySessions();
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         // Sur une déconnexion, on retire la session du websocket manager.
         this.webSocketManager.removeSession(session);
+        this.webSocketManager.notifySessions();
     }
 
 }
