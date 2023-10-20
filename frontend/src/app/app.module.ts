@@ -6,12 +6,12 @@ import { AppComponent } from "./app.component";
 import { LoginPageComponent } from "./login/login-page/login-page.component";
 import { LoginFormComponent } from "./login/login-form/login-form.component";
 import { ChatPageComponent } from "./chat/chat-page/chat-page.component";
-import { MessagesComponent } from "./messages/messages.component";
-import { NewMessageFormComponent } from "./new-message-form/new-message-form.component";
+import { MessagesComponent } from "./chat/messages/messages.component";
+import { NewMessageFormComponent } from "./chat/new-message-form/new-message-form.component";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { MatInputModule } from "@angular/material/input";
-import { MatButtonModule } from "@angular/material/button";
 import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatButtonModule } from "@angular/material/button";
 import { MatIconModule } from "@angular/material/icon";
 import { HttpClientModule } from "@angular/common/http";
 
@@ -29,9 +29,9 @@ import { HttpClientModule } from "@angular/common/http";
     AppRoutingModule,
     ReactiveFormsModule,
     BrowserAnimationsModule,
+    MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatFormFieldModule,
     MatIconModule,
     HttpClientModule,
   ],

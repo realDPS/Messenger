@@ -4,7 +4,7 @@ import { UserCredentials } from "./model/user-credentials";
 import { Router } from "@angular/router";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom } from "rxjs";
-import { LoginResponse } from "../interfaces/login-response";
+import { LoginResponse } from "./login-response";
 import { environment } from "src/environments/environment";
 
 @Injectable({
@@ -19,33 +19,45 @@ export class AuthenticationService {
     this.username.next(localStorage.getItem(AuthenticationService.KEY));
   }
 
-  async login(userCredentials: UserCredentials) {
+  async login(userCredentials: UserCredentials): Promise<void> {
     try {
-      // Requête HTTP au backend.
       const response = await firstValueFrom(
+        // Apelle le login du API.
         this.http.post<LoginResponse>(
           `${environment.backendUrl}/auth/login`,
           userCredentials,
           { withCredentials: true }
         )
       );
-      // Prend le session ID de la réponse.
-      const sessionId = response.sid;
-      localStorage.setItem(AuthenticationService.KEY, sessionId);
+
       // Met à jour le username.
-      this.username.next(userCredentials.username);
+      this.username.next(response.username);
+
+      // Met le username dans localStorage.
+      localStorage.setItem(AuthenticationService.KEY, response.username);
     } catch (error) {
-      // Message d'erreur.
-      console.error("Erreur du login", error);
     }
   }
 
-  logout() {
+  async logout(): Promise<void> {
     if (this.username.value !== null) {
+      // Enlève le username dans localStorage.
       localStorage.removeItem(AuthenticationService.KEY);
     }
     this.username.next(null);
+
+    // Navigue vers le Login.
     this.router.navigate(["/login"]);
+
+    try {
+      // Apelle le logout du API.
+      this.http.post<void>(
+        `${environment.backendUrl}/auth/logout`,
+        {},
+        { withCredentials: true }
+      );
+    } catch (error) {
+    }
   }
 
   getUsername(): Observable<string | null> {

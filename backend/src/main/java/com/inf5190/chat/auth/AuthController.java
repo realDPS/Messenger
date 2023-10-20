@@ -1,9 +1,8 @@
 package com.inf5190.chat.auth;
 
-import java.time.Duration;
-
 import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.time.Duration;
 
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -34,10 +33,13 @@ public class AuthController {
 
     @PostMapping(AUTH_LOGIN_PATH)
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
+
         // Creation d'un nouveau objet sessionData.
         SessionData sessionData = new SessionData(loginRequest.username());
+
         // Ajout de la session dans sessionManager.
         String sessionId = sessionManager.addSession(sessionData);
+
         // Construit le cookie à partir de sessionId.
         ResponseCookie cookie = ResponseCookie.from(SESSION_ID_COOKIE_NAME, sessionId)
                 .secure(true)
@@ -45,19 +47,32 @@ public class AuthController {
                 .path("/")
                 .maxAge(Duration.ofHours(24))
                 .build();
+
         // Crée un loginResponse à partir du username.
         LoginResponse loginResponse = new LoginResponse(loginRequest.username());
+
         // Construit ResponseEntity avec le cookie et le loginResponse.
         ResponseEntity<LoginResponse> responseEntity = ResponseEntity.ok()
                 .header("Set-Cookie", cookie.toString())
                 .body(loginResponse);
+
         return responseEntity;
     }
 
     @PostMapping(AUTH_LOGOUT_PATH)
-    public ResponseEntity<Void> logout(@CookieValue("sid") Cookie sessionCookie) {
+    public ResponseEntity<Void> logout(@CookieValue("sid") Cookie sessionCookie, HttpServletResponse response) {
+
+        String sessionId = sessionCookie.getValue();
+
+        // Enlève la session du sessionManger.
+        sessionManager.removeSession(sessionId);
+
+        // setMaxAge 0 pour que le cookie expire.
         sessionCookie.setMaxAge(0);
-        sessionManager.removeSession(sessionCookie.getName());
-        return ResponseEntity.ok().build();// todo:check
+
+        // Ajoute le nouveau cookie à la réponse
+        response.addCookie(sessionCookie);
+
+        return ResponseEntity.ok().build();
     }
 }

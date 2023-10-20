@@ -1,23 +1,43 @@
 import { Injectable } from "@angular/core";
 import { BehaviorSubject, Observable } from "rxjs";
 import { Message } from "./message.model";
+import { HttpClient } from "@angular/common/http";
+import { environment } from "../../environments/environment";
 
 @Injectable({
   providedIn: "root",
 })
 export class MessagesService {
   messages = new BehaviorSubject<Message[]>([]);
+  private messagesUrl = `${environment.backendUrl}/messages`;
 
-  constructor() {}
+  constructor(private http: HttpClient) {}
 
   postMessage(message: Message): void {
-    // Prend la valeur du message.
     const currentMessages = this.messages.getValue();
-    // Ajoute le nouveau message au tableau.
-    console.log(this.messages.getValue());
     currentMessages.push(message);
-    // Émet le message et met à jour le message courant.
     this.messages.next(currentMessages);
+
+    // Post le message au serveur.
+    this.http.post(this.messagesUrl, message).subscribe({
+      next: () => {
+      },
+      error: (error) => {
+        console.error("Erreur de post", error);
+      },
+    });
+  }
+
+  fetchMessages(): void {
+    // Get les messages du serveur.
+    this.http.get<Message[]>(this.messagesUrl).subscribe({
+      next: (messages) => {
+        this.messages.next(messages);
+      },
+      error: (error) => {
+        console.error("Error de get", error);
+      },
+    });
   }
 
   getMessages(): Observable<Message[]> {

@@ -9,14 +9,15 @@ import { Router } from "@angular/router";
   styleUrls: ["./login-page.component.css"],
 })
 export class LoginPageComponent implements OnInit {
-  constructor(private as: AuthenticationService, private router: Router) {}
+  constructor(
+    private authenticationService: AuthenticationService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {}
 
-  onLogin(UserCredentials: UserCredentials) {
-    // Recoit les données de l'évenement login.
-    console.log("Données du Login:", UserCredentials);
-    this.as.login(UserCredentials);
+  onLogin(userCredentials: UserCredentials) {
+    this.authenticationService.login(userCredentials);
     this.router.navigate(["/chat"]);
   }
 }

@@ -19,21 +19,21 @@ public class MessageRepository {
     private final AtomicLong idGenerator = new AtomicLong(0);
 
     public List<Message> getMessages(Long fromId) {
-        List<Message> result = new ArrayList<>();
-        for (Message message : messages) {
-            if (message.id() > fromId) {
-                result.add(message);
-            }
-        }
-        return result;
-
+        // Retourne une liste de tout les messages.
+        return new ArrayList<>(messages);
     }
 
     public Message createMessage(Message message) {
-        // todo:Need to check content of arg message.
-        Message m = new Message(idGenerator.incrementAndGet(), message.username(), message.timestamp(), message.text());
-        messages.add(m);
-        return m;
+        // Genère un Id des messages.
+        long messageId = idGenerator.incrementAndGet();
+
+        // Crée un nouveau messsage avec ce Id.
+        Message newMessage = new Message(messageId, message.username(), System.currentTimeMillis(), message.text());
+
+        // Ajoute le message à la liste.
+        messages.add(newMessage);
+
+        return newMessage;
     }
 
 }

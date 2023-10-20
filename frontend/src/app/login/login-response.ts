@@ -1,3 +1,3 @@
 export interface LoginResponse {
-  sid: string;
+  username: string;
 }
