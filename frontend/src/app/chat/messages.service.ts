@@ -19,7 +19,7 @@ export class MessagesService {
     this.messages.next(currentMessages);
 
     // Post le message au serveur.
-    this.http.post(this.messagesUrl, message).subscribe({
+    this.http.post(this.messagesUrl, message, {withCredentials:true}).subscribe({
       next: () => {
       },
       error: (error) => {
@@ -30,7 +30,7 @@ export class MessagesService {
 
   fetchMessages(): void {
     // Get les messages du serveur.
-    this.http.get<Message[]>(this.messagesUrl).subscribe({
+    this.http.get<Message[]>(this.messagesUrl, {withCredentials:true}).subscribe({
       next: (messages) => {
         this.messages.next(messages);
       },
