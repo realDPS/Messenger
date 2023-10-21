@@ -36,7 +36,16 @@ export class ChatPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.webSocketService.connect();
+    this.messagesService.fetchMessages();
+
+    //connect() retourne un observable(emet des notification).
+    //Connection avec subscribe. lorsque l'event est "notif", fetch messages.
+    this.webSocketService.connect().subscribe((event) => {
+      if (event === 'notif') {
+        this.messagesService.fetchMessages();
+      }
+    });
+
   }
 
   ngOnDestroy(): void {
