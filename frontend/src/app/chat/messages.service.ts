@@ -10,6 +10,7 @@ import { environment } from "../../environments/environment";
 export class MessagesService {
   messages = new BehaviorSubject<Message[]>([]);
   private messagesUrl = `${environment.backendUrl}/messages`;
+  private lastMessageId = 0;
 
   constructor(private http: HttpClient) {}
 
@@ -30,16 +31,27 @@ export class MessagesService {
 
   fetchMessages(): void {
     // Get les messages du serveur.
-    this.http.get<Message[]>(this.messagesUrl,{ withCredentials: true }).subscribe({
+    let url = this.messagesUrl;
+
+    //Update le url pour recevoir les nouveaux messages
+    if(this.lastMessageId!=0){
+      url+=`?fromId=${this.lastMessageId}`
+    }
+    else{
+      url+="?fromId=0"
+    }
+
+    this.http.get<Message[]>(url,{ withCredentials: true }).subscribe({
       next: (messages) => {
         this.messages.next(messages);
+        this.lastMessageId++;
       },
       error: (error) => {
         console.error("Error de get", error);
       },
     });
   }
-
+  
   getMessages(): Observable<Message[]> {
     return this.messages.asObservable();
   }
