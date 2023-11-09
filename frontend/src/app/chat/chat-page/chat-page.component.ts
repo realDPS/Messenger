@@ -1,10 +1,9 @@
 import { Component, OnDestroy, OnInit } from "@angular/core";
-import { Subscription } from "rxjs";
+import { Observable, Subscription } from "rxjs";
 import { AuthenticationService } from "src/app/login/authentication.service";
-import { Message } from "../message.model";
 import { MessagesService } from "../messages.service";
 import { Router } from "@angular/router";
-import { WebSocketService } from "../../web-socket.service";
+import { WebSocketEvent, WebSocketService } from "../websocket.service";
 
 @Component({
   selector: "app-chat-page",
@@ -18,8 +17,8 @@ export class ChatPageComponent implements OnInit, OnDestroy {
   username: string | null = null;
   usernameSubscription: Subscription;
 
-  messages: Message[] = [];
-  messagesSubscription: Subscription;
+  notifications$: Observable<WebSocketEvent> | null = null;
+  notificationsSubscription: Subscription | null = null;
 
   constructor(
     private router: Router,
@@ -30,47 +29,39 @@ export class ChatPageComponent implements OnInit, OnDestroy {
     this.usernameSubscription = this.username$.subscribe((u) => {
       this.username = u;
     });
-    this.messagesSubscription = this.messages$.subscribe((m) => {
-      this.messages = m;
-    });
   }
 
-  ngOnInit(): void {
-    this.messagesService.fetchMessages();
-
-    //connect() retourne un observable(emet des notification).
-    //Connection avec subscribe. lorsque l'event est "notif", fetch messages.
-    this.webSocketService.connect().subscribe((event) => {
-      if (event === 'notif') {
-        this.messagesService.fetchMessages();
-      }
+  ngOnInit() {
+    this.notifications$ = this.webSocketService.connect();
+    this.notificationsSubscription = this.notifications$.subscribe(() => {
+      this.messagesService.fetchMessages();
     });
-
+    this.messagesService.fetchMessages();
   }
 
   ngOnDestroy(): void {
     if (this.usernameSubscription) {
       this.usernameSubscription.unsubscribe();
     }
-    if (this.messagesSubscription) {
-      this.messagesSubscription.unsubscribe();
+    if (this.notificationsSubscription) {
+      this.notificationsSubscription.unsubscribe();
     }
     this.webSocketService.disconnect();
   }
 
-  onPublishMessage(message: string) {
+  async onPublishMessage(message: string) {
     if (this.username != null) {
-      this.messagesService.postMessage({
-        id: 0,
+      await this.messagesService.postMessage({
         text: message,
         username: this.username,
-        timestamp: Date.now(),
       });
     }
   }
 
   onLogout() {
+    this.webSocketService.disconnect();
     this.authenticationService.logout();
+    this.messagesService.clear();
     this.router.navigate(["/"]);
   }
 }

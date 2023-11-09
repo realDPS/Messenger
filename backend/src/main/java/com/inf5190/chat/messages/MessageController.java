@@ -1,12 +1,12 @@
 package com.inf5190.chat.messages;
 
 import com.inf5190.chat.auth.session.SessionDataAccessor;
+import com.inf5190.chat.messages.model.Message;
 import com.inf5190.chat.messages.repository.MessageRepository;
 import com.inf5190.chat.websocket.WebSocketManager;
-import com.inf5190.chat.messages.model.Message;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,28 +31,16 @@ public class MessageController {
         this.webSocketManager = webSocketManager;
     }
 
-    // GET pour trouver les messages.
     @GetMapping(MESSAGES_PATH)
-    public List<Message> getAllMessages(@RequestParam(name = "fromId", required = false) Long fromId) {
-        List<Message> messages = messageRepository.getMessages(fromId);
-        List<Message> recentMessages = new ArrayList<>();
-
-        for (Message message : messages) {
-            if (message.id() > fromId) {
-                recentMessages.add(message);
-            }
-        }
-
-        return recentMessages;
+    public List<Message> getMessages(@RequestParam Optional<Long> fromId) {
+        return this.messageRepository.getMessages(fromId.orElse(null));
     }
 
-    // POST pour créer un nouveau message.
     @PostMapping(MESSAGES_PATH)
-    public Message createNewMessage(@RequestBody Message message) {
-        Message newMessage = messageRepository.createMessage(message);
+    public Message createMessage(@RequestBody Message message) {
+        Message newMessage = this.messageRepository.createMessage(message);
 
-        // Apelle notifySessions quand un message est crée.
-        webSocketManager.notifySessions();
+        this.webSocketManager.notifySessions();
 
         return newMessage;
     }

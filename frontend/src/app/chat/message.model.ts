@@ -1,6 +1,11 @@
-export interface Message {  
-  id:Number;
+export interface Message {
+  id: number;
   text: string;
   username: string;
   timestamp: number;
+}
+
+export interface NewMessageRequest {
+  text: string;
+  username: string;
 }

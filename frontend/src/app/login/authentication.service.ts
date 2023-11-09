@@ -1,11 +1,9 @@
 import { Injectable } from "@angular/core";
-import { BehaviorSubject, Observable } from "rxjs";
+import { BehaviorSubject, Observable, firstValueFrom } from "rxjs";
 import { UserCredentials } from "./model/user-credentials";
-import { Router } from "@angular/router";
 import { HttpClient } from "@angular/common/http";
-import { firstValueFrom } from "rxjs";
-import { LoginResponse } from "./login-response";
 import { environment } from "src/environments/environment";
+import { LoginResponse } from "./model/login-response";
 
 @Injectable({
   providedIn: "root",
@@ -15,49 +13,30 @@ export class AuthenticationService {
 
   private username = new BehaviorSubject<string | null>(null);
 
-  constructor(private router: Router, private http: HttpClient) {
+  constructor(private httpClient: HttpClient) {
     this.username.next(localStorage.getItem(AuthenticationService.KEY));
   }
 
-  async login(userCredentials: UserCredentials): Promise<void> {
-    try {
-      const response = await firstValueFrom(
-        // Apelle le login du API.
-        this.http.post<LoginResponse>(
-          `${environment.backendUrl}/auth/login`,
-          userCredentials,
-          { withCredentials: true }
-        )
-      );
-
-      // Met à jour le username.
-      this.username.next(response.username);
-
-      // Met le username dans localStorage.
-      localStorage.setItem(AuthenticationService.KEY, response.username);
-    } catch (error) {
-    }
+  async login(userCredentials: UserCredentials) {
+    const response = await firstValueFrom(
+      this.httpClient.post<LoginResponse>(
+        `${environment.backendUrl}/auth/login`,
+        userCredentials,
+        { withCredentials: true }
+      )
+    );
+    localStorage.setItem(AuthenticationService.KEY, response.username);
+    this.username.next(response.username);
   }
 
-  async logout(): Promise<void> {
-    if (this.username.value !== null) {
-      // Enlève le username dans localStorage.
-      localStorage.removeItem(AuthenticationService.KEY);
-    }
+  async logout() {
+    await firstValueFrom(
+      this.httpClient.post(`${environment.backendUrl}/auth/logout`, null, {
+        withCredentials: true,
+      })
+    );
+    localStorage.removeItem(AuthenticationService.KEY);
     this.username.next(null);
-
-    // Navigue vers le Login.
-    this.router.navigate(["/login"]);
-
-    try {
-      // Apelle le logout du API.
-      this.http.post<void>(
-        `${environment.backendUrl}/auth/logout`,
-        {},
-        { withCredentials: true }
-      );
-    } catch (error) {
-    }
   }
 
   getUsername(): Observable<string | null> {
