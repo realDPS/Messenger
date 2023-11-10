@@ -1,26 +1,27 @@
 package com.inf5190.chat.auth;
 
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
-import java.time.Duration;
-import java.util.concurrent.ExecutionException;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.inf5190.chat.auth.model.LoginRequest;
 import com.inf5190.chat.auth.model.LoginResponse;
-import com.inf5190.chat.auth.session.SessionData;
-import com.inf5190.chat.auth.session.SessionManager;
 import com.inf5190.chat.auth.repository.FirestoreUserAccount;
 import com.inf5190.chat.auth.repository.UserAccountRepository;
+import com.inf5190.chat.auth.session.SessionData;
+import com.inf5190.chat.auth.session.SessionManager;
 
 /**
  * Contrôleur qui gère l'API de login et logout.
@@ -33,9 +34,11 @@ public class AuthController {
 
     private final SessionManager sessionManager;
     private final UserAccountRepository userRepo = new UserAccountRepository();
+    private final PasswordEncoder passwordEncoder;
 
-    public AuthController(SessionManager sessionManager) {
+    public AuthController(SessionManager sessionManager, PasswordEncoder passwordEncoder) {
         this.sessionManager = sessionManager;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @PostMapping(AUTH_LOGIN_PATH)
@@ -46,8 +49,14 @@ public class AuthController {
         FirestoreUserAccount user = userRepo.getUserAccount(loginRequest.username());
 
         if (user == null) {
-            user = new FirestoreUserAccount(loginRequest.username(), loginRequest.password());// todo:need to be encoded
+            String encodedPassword = passwordEncoder.encode(loginRequest.password());
+            user = new FirestoreUserAccount(loginRequest.username(), encodedPassword);
             userRepo.setUserAccount(user);
+        } else {
+            // Validation du mot de passe
+            if (!passwordEncoder.matches(loginRequest.password(), user.getEncodedPassword())) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Mot de passe erroné");
+            }
         }
 
         ResponseCookie sessionCookie = this.createResponseSessionCookie(sessionId, TimeUnit.DAYS.toSeconds(1));
