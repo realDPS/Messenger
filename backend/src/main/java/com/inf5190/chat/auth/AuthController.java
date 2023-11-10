@@ -32,17 +32,18 @@ public class AuthController {
     public static final String SESSION_ID_COOKIE_NAME = "sid";
 
     private final SessionManager sessionManager;
-	private final UserAccountRepository userRepo = new UserAccountRepository();
+    private final UserAccountRepository userRepo = new UserAccountRepository();
 
     public AuthController(SessionManager sessionManager) {
         this.sessionManager = sessionManager;
     }
 
     @PostMapping(AUTH_LOGIN_PATH)
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest)
+            throws InterruptedException, ExecutionException {
         String sessionId = this.sessionManager.addSession(new SessionData(loginRequest.username()));
-		
-		FirestoreUserAccount user = userRepo.getUserAccount(loginRequest.username());
+
+        FirestoreUserAccount user = userRepo.getUserAccount(loginRequest.username());
 
         if (user == null) {
             user = new FirestoreUserAccount(loginRequest.username(), loginRequest.password());// todo:need to be encoded
