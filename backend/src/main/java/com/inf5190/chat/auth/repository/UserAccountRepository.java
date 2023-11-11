@@ -2,6 +2,9 @@ package com.inf5190.chat.auth.repository;
 
 import java.util.concurrent.ExecutionException;
 import org.springframework.stereotype.Repository;
+
+import com.google.cloud.firestore.CollectionReference;
+import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.Firestore;
 import com.google.firebase.cloud.FirestoreClient;
 
@@ -9,10 +12,14 @@ import com.google.firebase.cloud.FirestoreClient;
 public class UserAccountRepository {
     private static final String COLLECTION_NAME = "userAccounts";
     private final Firestore firestore = FirestoreClient.getFirestore();
+    // Collection de userAccount
+    final CollectionReference collectionRef = firestore.collection(
+            COLLECTION_NAME);
 
     public FirestoreUserAccount getUserAccount(String username) throws InterruptedException, ExecutionException {
-        return firestore.collection(COLLECTION_NAME).document(username).get().get()
-                .toObject(FirestoreUserAccount.class);
+        // document avec :username
+        final DocumentReference docRef = collectionRef.document(username);
+        return docRef.get().get().toObject(FirestoreUserAccount.class);
 
     }
 
