@@ -7,6 +7,7 @@ import com.inf5190.chat.websocket.WebSocketManager;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,7 +33,8 @@ public class MessageController {
     }
 
     @GetMapping(MESSAGES_PATH)
-    public List<Message> getMessages(@RequestParam Optional<Long> fromId) {
+    public List<Message> getMessages(@RequestParam Optional<String> fromId)
+            throws InterruptedException, ExecutionException {
         return this.messageRepository.getMessages(fromId.orElse(null));
     }
 
