@@ -25,10 +25,10 @@ public class UserAccountRepository {
 
     public void setUserAccount(FirestoreUserAccount userAccount) throws InterruptedException, ExecutionException {
         try {
-            firestore.collection(COLLECTION_NAME).document().create(userAccount);// add(userAccount);
+            // Add userAccount
+            firestore.collection(COLLECTION_NAME).document().create(userAccount);
         } catch (Exception e) {
             throw new UnsupportedOperationException(e);
         }
-
     }
 }
