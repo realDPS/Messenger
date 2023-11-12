@@ -20,7 +20,6 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.inf5190.chat.auth.AuthController;
 import com.inf5190.chat.auth.filter.AuthFilter;
-
 import com.inf5190.chat.auth.session.SessionDataAccessor;
 import com.inf5190.chat.auth.session.SessionManager;
 import com.inf5190.chat.messages.MessageController;

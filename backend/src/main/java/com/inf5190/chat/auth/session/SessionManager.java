@@ -1,16 +1,20 @@
 package com.inf5190.chat.auth.session;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 import javax.crypto.SecretKey;
 
 import org.springframework.stereotype.Repository;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.security.Keys;
 
 /**
@@ -22,7 +26,10 @@ import io.jsonwebtoken.security.Keys;
 public class SessionManager {
 
     private final Map<String, SessionData> sessions = new HashMap<String, SessionData>();
-    private static final String SECRET_KEY_BASE64 = "<VOTRE CLÉ SECRÈTE>";
+
+    SecretKey key = Jwts.SIG.HS256.key().build();
+    String secretString = Encoders.BASE64.encode(key.getEncoded());
+    private final String SECRET_KEY_BASE64 = secretString;
     private final SecretKey secretKey;
     private final JwtParser jwtParser;
 
@@ -32,9 +39,16 @@ public class SessionManager {
     }
 
     public String addSession(SessionData authData) {
-        final String sessionId = this.generateSessionId();
-        this.sessions.put(sessionId, authData);
-        return sessionId;
+
+        String jwt = Jwts.builder()
+                .subject(authData.username())
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + 2 * 60 * 60 * 1000))
+                .signWith(this.secretKey)
+                .compact();
+
+        this.sessions.put(jwt, authData);
+        return jwt;
     }
 
     public void removeSession(String sessionId) {
@@ -42,11 +56,17 @@ public class SessionManager {
     }
 
     public SessionData getSession(String sessionId) {
-        return this.sessions.get(sessionId);
-    }
 
-    private String generateSessionId() {
-        return UUID.randomUUID().toString();
+        try {
+            Jws<Claims> signedClaims = jwtParser.parseSignedClaims(sessionId);
+            Claims claims = signedClaims.getPayload();
+            String username = claims.getSubject();
+            if (sessions.containsKey(sessionId)) {
+                return new SessionData(username);
+            }
+        } catch (JwtException | IllegalArgumentException e) {
+            return null;
+        }
+        return null;
     }
-
 }
