@@ -71,14 +71,6 @@ public class MessageRepository {
         }
 
         return message;
-        FirestoreMessage firemsg = new FirestoreMessage(message.username(), Timestamp.now(), message.text());
-        try {
-            firestore.collection(COLLECTION_NAME).document().create(firemsg);
-        } catch (Exception e) {
-            throw new UnsupportedOperationException(e);
-        }
-
-        return message;
     }
 
 }
