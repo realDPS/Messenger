@@ -13,10 +13,15 @@ export class MessagesService {
   constructor(private httpClient: HttpClient) {}
 
   async postMessage(message: NewMessageRequest): Promise<Message> {
+    const messageToSend: NewMessageRequest = {
+      text: message.text,
+      username: message.username,
+      imageData: null,
+    };
     return firstValueFrom(
       this.httpClient.post<Message>(
         `${environment.backendUrl}/messages`,
-        message,
+        messageToSend,
         {
           withCredentials: true,
         }
