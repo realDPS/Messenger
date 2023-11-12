@@ -15,6 +15,7 @@ import com.google.cloud.firestore.Query;
 import com.google.cloud.firestore.QuerySnapshot;
 import com.google.firebase.cloud.FirestoreClient;
 import com.inf5190.chat.messages.model.Message;
+import com.inf5190.chat.messages.model.NewMessageRequest;
 
 /**
  * Classe qui gère la persistence des messages.
@@ -56,14 +57,14 @@ public class MessageRepository {
         querySnapshot.forEach(document -> {
             String id = document.getId();
             FirestoreMessage m = document.toObject(FirestoreMessage.class);
-            result.add(new Message(id, m.getUsername(), m.getTimestamp().getSeconds(), m.getText()));
+            result.add(new Message(id, m.getUsername(), m.getTimestamp().getSeconds(), m.getText(), m.getimageUrl()));
         });
         // System.out.println(result);
         return result;
     }
 
-    public Message createMessage(Message message) {
-        FirestoreMessage firemsg = new FirestoreMessage(message.username(), Timestamp.now(), message.text());
+    public NewMessageRequest createMessage(NewMessageRequest message) {
+        FirestoreMessage firemsg = new FirestoreMessage(message.username(), Timestamp.now(), message.text(), null);
         try {
             firestore.collection(COLLECTION_NAME).document().create(firemsg);
         } catch (Exception e) {

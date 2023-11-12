@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.inf5190.chat.auth.session.SessionDataAccessor;
 import com.inf5190.chat.messages.model.Message;
+import com.inf5190.chat.messages.model.NewMessageRequest;
 import com.inf5190.chat.messages.repository.MessageRepository;
 import com.inf5190.chat.websocket.WebSocketManager;
 
@@ -38,8 +39,8 @@ public class MessageController {
     }
 
     @PostMapping(MESSAGES_PATH)
-    public Message createMessage(@RequestBody Message message) {
-        Message newMessage = this.messageRepository.createMessage(message);
+    public NewMessageRequest createMessage(@RequestBody NewMessageRequest message) {
+        NewMessageRequest newMessage = this.messageRepository.createMessage(message);
         this.webSocketManager.notifySessions();
         return newMessage;
     }
