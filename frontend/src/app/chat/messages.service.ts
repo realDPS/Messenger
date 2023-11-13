@@ -16,7 +16,7 @@ export class MessagesService {
     const messageToSend: NewMessageRequest = {
       text: message.text,
       username: message.username,
-      imageData: null,
+      imageData: message.imageData,
     };
     return firstValueFrom(
       this.httpClient.post<Message>(
