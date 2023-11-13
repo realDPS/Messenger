@@ -7,8 +7,17 @@
   <div class="chat-messages">
     <div>
       <app-messages [messages]="(messages$ | async)!"></app-messages>
-      <app-new-message-form (newMessage)="onPublishMessage($event)"></app-new-message-form>
-      <input #file name="file" type="file" style="display: none" accept="image/*" (change)="fileChanged($event)" />
+      <app-new-message-form
+        (newMessage)="onPublishMessage($event)"
+      ></app-new-message-form>
+      <input
+        #file
+        name="file"
+        type="file"
+        style="display: none"
+        accept="image/*"
+        (change)="fileChanged($event)"
+      />
       <span matSuffix (click)="file.click()">
         <mat-icon>image</mat-icon>
       </span>

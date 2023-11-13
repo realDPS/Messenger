@@ -14,8 +14,20 @@ import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.Query;
 import com.google.cloud.firestore.QuerySnapshot;
 import com.google.firebase.cloud.FirestoreClient;
+import com.google.firebase.cloud.StorageClient;
 import com.inf5190.chat.messages.model.Message;
 import com.inf5190.chat.messages.model.NewMessageRequest;
+
+import io.jsonwebtoken.io.Decoders;
+
+import com.google.cloud.storage.Bucket;
+import com.google.cloud.storage.Blob;
+import com.google.cloud.storage.BlobId;
+import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.Storage.PredefinedAcl;
+import com.google.cloud.storage.StorageOptions;
+import com.google.cloud.storage.Bucket.BlobTargetOption;
+import com.google.cloud.storage.BlobInfo;
 
 /**
  * Classe qui gère la persistence des messages.
@@ -25,6 +37,7 @@ import com.inf5190.chat.messages.model.NewMessageRequest;
 @Repository
 public class MessageRepository {
     private final List<Message> messages = new ArrayList<Message>();
+    private static final String BUCKET_NAME = "inf5190-chat-2080f.appspot.com";
 
     private static final String COLLECTION_NAME = "messages";
     private final Firestore firestore = FirestoreClient.getFirestore();
@@ -64,7 +77,21 @@ public class MessageRepository {
     }
 
     public NewMessageRequest createMessage(NewMessageRequest message) {
-        FirestoreMessage firemsg = new FirestoreMessage(message.username(), Timestamp.now(), message.text(), null);
+        FirestoreMessage firemsg;
+
+        if (message.imageData() != null) {
+            Bucket b = StorageClient.getInstance().bucket(BUCKET_NAME);
+            String path = String.format("images/%s.%s", "test", message.imageData().type());
+            b.create(path, Decoders.BASE64.decode(message.imageData().data()),
+                    BlobTargetOption.predefinedAcl(PredefinedAcl.PUBLIC_READ));
+            String imageUrl = String.format("https://storage.googleapis.com/%s/%s", BUCKET_NAME,
+                    path);
+
+            firemsg = new FirestoreMessage(message.username(), Timestamp.now(), message.text(), imageUrl);
+        } else {
+            firemsg = new FirestoreMessage(message.username(), Timestamp.now(), message.text(), null);
+        }
+
         try {
             firestore.collection(COLLECTION_NAME).document().create(firemsg);
         } catch (Exception e) {
@@ -73,5 +100,4 @@ public class MessageRepository {
 
         return message;
     }
-
 }
