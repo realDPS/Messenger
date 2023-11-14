@@ -33,44 +33,38 @@ public class AuthController {
     public static final String SESSION_ID_COOKIE_NAME = "sid";
 
     private final SessionManager sessionManager;
-    private final UserAccountRepository userRepo = new UserAccountRepository();
+    private final UserAccountRepository userAccountRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public AuthController(SessionManager sessionManager, PasswordEncoder passwordEncoder) {
+    public AuthController(SessionManager sessionManager, UserAccountRepository userAccountRepository,
+            PasswordEncoder passwordEncoder) {
         this.sessionManager = sessionManager;
+        this.userAccountRepository = userAccountRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
     @PostMapping(AUTH_LOGIN_PATH)
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest)
             throws InterruptedException, ExecutionException {
-        String sessionId = this.sessionManager.addSession(new SessionData(loginRequest.username()));
-
-        FirestoreUserAccount user = userRepo.getUserAccount(loginRequest.username());
-
-        if (user == null) {
-            String encodedPassword = passwordEncoder.encode(loginRequest.password());
-            user = new FirestoreUserAccount(loginRequest.username(), encodedPassword);
-            userRepo.setUserAccount(user);
-        } else {
-            // Validation du mot de passe
-            if (!passwordEncoder.matches(loginRequest.password(), user.getEncodedPassword())) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Mot de passe erroné");
-            }
+        FirestoreUserAccount account = this.userAccountRepository.getUserAccount(loginRequest.username());
+        if (account == null) {
+            String encodedPassword = this.passwordEncoder.encode(loginRequest.password());
+            this.userAccountRepository
+                    .setUserAccount(new FirestoreUserAccount(loginRequest.username(), encodedPassword));
+        } else if (!this.passwordEncoder.matches(loginRequest.password(), account.getEncodedPassword())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
+
+        String sessionId = this.sessionManager.addSession(new SessionData(loginRequest.username()));
 
         ResponseCookie sessionCookie = this.createResponseSessionCookie(sessionId, TimeUnit.DAYS.toSeconds(1));
 
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, sessionCookie.toString())
+        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, sessionCookie.toString())
                 .body(new LoginResponse(loginRequest.username()));
-
     }
 
     @PostMapping(AUTH_LOGOUT_PATH)
-    public ResponseEntity<Void> logout(@CookieValue("sid") Cookie sessionCookie) {
-        this.sessionManager.removeSession(sessionCookie.getValue());
-
+    public ResponseEntity<Void> logout() {
         ResponseCookie deleteSessionCookie = this.createResponseSessionCookie(null, 0);
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, deleteSessionCookie.toString()).body(null);

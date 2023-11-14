@@ -1,7 +1,4 @@
 package com.inf5190.chat.messages.model;
 
-/**
- * Représente un message.
- */
-public record NewMessageRequest(String text, String username, ChatImageData imageData) {
+public record NewMessageRequest(String username, String text, ChatImageData imageData) {
 }

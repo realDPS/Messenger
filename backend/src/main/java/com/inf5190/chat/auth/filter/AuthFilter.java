@@ -19,29 +19,23 @@ import org.springframework.http.HttpMethod;
 
 import com.inf5190.chat.auth.AuthController;
 import com.inf5190.chat.auth.session.SessionData;
-import com.inf5190.chat.auth.session.SessionDataAccessor;
 import com.inf5190.chat.auth.session.SessionManager;
 
 /**
  * Filtre qui intercepte les requêtes HTTP et valide si elle est autorisée.
  */
 public class AuthFilter implements Filter {
-    private final SessionDataAccessor sessionDataAccessor;
     private final SessionManager sessionManager;
     private final List<String> allowedOrigins;
 
-    public AuthFilter(SessionDataAccessor sessionDataAccessor, SessionManager sessionManager,
-            List<String> allowedOrigins) {
-        this.sessionDataAccessor = sessionDataAccessor;
+    public AuthFilter(SessionManager sessionManager, List<String> allowedOrigins) {
         this.sessionManager = sessionManager;
         this.allowedOrigins = allowedOrigins;
     }
 
     @Override
-    public void doFilter(
-            ServletRequest request,
-            ServletResponse response,
-            FilterChain chain) throws IOException, ServletException {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+            throws IOException, ServletException {
         final HttpServletRequest httpRequest = (HttpServletRequest) request;
         final HttpServletResponse httpResponse = (HttpServletResponse) response;
 
@@ -77,13 +71,10 @@ public class AuthFilter implements Filter {
             return;
         }
 
-        this.sessionDataAccessor.setSessionData(httpRequest, sessionData);
-
         chain.doFilter(request, response);
     }
 
     protected void sendAuthErrorResponse(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
         Cookie sessionIdCookie = new Cookie(AuthController.SESSION_ID_COOKIE_NAME, null);
         sessionIdCookie.setPath("/");
         sessionIdCookie.setSecure(true);

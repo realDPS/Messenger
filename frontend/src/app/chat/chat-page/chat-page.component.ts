@@ -4,7 +4,6 @@ import { AuthenticationService } from "src/app/login/authentication.service";
 import { MessagesService } from "../messages.service";
 import { Router } from "@angular/router";
 import { WebSocketEvent, WebSocketService } from "../websocket.service";
-import { ChatImageData, NewMessageRequest } from "../message.model";
 import { FileReaderService } from "../file-reader.service";
 
 @Component({
@@ -17,7 +16,6 @@ export class ChatPageComponent implements OnInit, OnDestroy {
   username$ = this.authenticationService.getUsername();
 
   username: string | null = null;
-  file: File | null = null;
   usernameSubscription: Subscription;
 
   notifications$: Observable<WebSocketEvent> | null = null;
@@ -33,10 +31,6 @@ export class ChatPageComponent implements OnInit, OnDestroy {
     this.usernameSubscription = this.username$.subscribe((u) => {
       this.username = u;
     });
-  }
-
-  fileChanged(event: any) {
-    this.file = event.target.files[0];
   }
 
   ngOnInit() {
@@ -57,28 +51,24 @@ export class ChatPageComponent implements OnInit, OnDestroy {
     this.webSocketService.disconnect();
   }
 
-  async onPublishMessage(message: string) {
+  async onPublishMessage(event: { message: string; file: File | null }) {
     if (this.username != null) {
-      let imageData: ChatImageData | null = null;
+      const imageData =
+        event.file != null
+          ? await this.fileReaderService.readFile(event.file)
+          : null;
 
-      if (this.file) {
-        imageData = await this.fileReaderService.readFile(this.file);
-      }
-
-      const newMessage: NewMessageRequest = {
-        text: message,
+      await this.messagesService.postMessage({
+        text: event.message,
         username: this.username,
         imageData: imageData,
-      };
-
-      await this.messagesService.postMessage(newMessage);
+      });
     }
   }
 
-  onLogout() {
-    this.webSocketService.disconnect();
-    this.authenticationService.logout();
+  async onLogout() {
     this.messagesService.clear();
+    await this.authenticationService.logout();
     this.router.navigate(["/"]);
   }
 }

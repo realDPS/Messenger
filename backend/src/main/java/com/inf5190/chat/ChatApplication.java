@@ -20,7 +20,7 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.inf5190.chat.auth.AuthController;
 import com.inf5190.chat.auth.filter.AuthFilter;
-import com.inf5190.chat.auth.session.SessionDataAccessor;
+
 import com.inf5190.chat.auth.session.SessionManager;
 import com.inf5190.chat.messages.MessageController;
 
@@ -30,22 +30,25 @@ import com.inf5190.chat.messages.MessageController;
 @SpringBootApplication
 @PropertySource("classpath:cors.properties")
 public class ChatApplication {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ChatApplication.class);
 
     @Value("${cors.allowedOrigins}")
     private String allowedOriginsConfig;
-    private static final Logger LOGGER = LoggerFactory.getLogger(ChatApplication.class);
 
     public static void main(String[] args) {
         try {
             if (FirebaseApp.getApps().size() == 0) {
                 FileInputStream serviceAccount = new FileInputStream("firebase-key.json");
+
                 FirebaseOptions options = FirebaseOptions.builder()
                         .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                         .build();
+
                 LOGGER.info("Initializing Firebase application.");
                 FirebaseApp.initializeApp(options);
             }
             LOGGER.info("Firebase application already initialized.");
+
             SpringApplication.run(ChatApplication.class, args);
         } catch (IOException e) {
             System.err.println("Could not initialise application. Please check you service account key path");
@@ -57,12 +60,10 @@ public class ChatApplication {
      */
     @Bean
     public FilterRegistrationBean<AuthFilter> authenticationFilter(
-            SessionDataAccessor sessionDataAccessor,
             SessionManager sessionManager) {
         FilterRegistrationBean<AuthFilter> registrationBean = new FilterRegistrationBean<>();
 
-        registrationBean.setFilter(new AuthFilter(sessionDataAccessor,
-                sessionManager, Arrays.asList(allowedOriginsConfig.split(","))));
+        registrationBean.setFilter(new AuthFilter(sessionManager, Arrays.asList(allowedOriginsConfig.split(","))));
         registrationBean.addUrlPatterns(MessageController.MESSAGES_PATH, AuthController.AUTH_LOGOUT_PATH);
 
         return registrationBean;
@@ -72,4 +73,5 @@ public class ChatApplication {
     public PasswordEncoder getPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
 }
