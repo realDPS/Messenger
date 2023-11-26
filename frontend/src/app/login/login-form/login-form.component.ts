@@ -1,5 +1,5 @@
 import { Component, EventEmitter, OnInit, Output } from "@angular/core";
-import { FormBuilder, Validators } from "@angular/forms";
+import { FormBuilder } from "@angular/forms";
 import { UserCredentials } from "../model/user-credentials";
 
 @Component({
@@ -9,11 +9,9 @@ import { UserCredentials } from "../model/user-credentials";
 })
 export class LoginFormComponent implements OnInit {
   loginForm = this.fb.group({
-    username: [null, [Validators.required]],
-    password: [
-      null,[Validators.required]],
+    username: "",
+    password: "",
   });
-  
 
   @Output()
   login = new EventEmitter<UserCredentials>();
@@ -34,19 +32,4 @@ export class LoginFormComponent implements OnInit {
       });
     }
   }
-  showNameRequiredError(): boolean {
-    return this.showError("username", "required");
-  }
-  showPasswordRequiredError(): boolean {
-    return this.showError("password", "required");
-  }
-
-
-  private showError(field: "username" | "password", error: string): boolean {
-    return (
-      this.loginForm.controls[field].hasError(error) &&
-      (this.loginForm.controls[field].dirty || this.loginForm.controls[field].touched)
-    );
-  }
-
 }

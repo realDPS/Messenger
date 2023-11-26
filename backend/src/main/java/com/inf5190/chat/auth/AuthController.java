@@ -50,7 +50,7 @@ public class AuthController {
         if (account == null) {
             String encodedPassword = this.passwordEncoder.encode(loginRequest.password());
             this.userAccountRepository
-                    .setUserAccount(new FirestoreUserAccount(loginRequest.username(), encodedPassword));
+                    .createUserAccount(new FirestoreUserAccount(loginRequest.username(), encodedPassword));
         } else if (!this.passwordEncoder.matches(loginRequest.password(), account.getEncodedPassword())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }

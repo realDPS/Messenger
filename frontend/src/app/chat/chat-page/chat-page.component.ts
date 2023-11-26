@@ -34,11 +34,11 @@ export class ChatPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-        this.notifications$ = this.webSocketService.connect();
+    this.notifications$ = this.webSocketService.connect();
     this.notificationsSubscription = this.notifications$.subscribe(() => {
-      this.fetchMessages();
+      this.messagesService.fetchMessages();
     });
-    this.fetchMessages();
+    this.messagesService.fetchMessages();
   }
 
   ngOnDestroy(): void {
@@ -58,25 +58,14 @@ export class ChatPageComponent implements OnInit, OnDestroy {
           ? await this.fileReaderService.readFile(event.file)
           : null;
 
-      try {
-        await this.messagesService.postMessage({
-          text: event.message,
-          username: this.username,
-          imageData: imageData,
-        });
-      } catch (error) {
-        this.onLogout();
-      }
+      await this.messagesService.postMessage({
+        text: event.message,
+        username: this.username,
+        imageData: imageData,
+      });
     }
   }
-  async fetchMessages(): Promise<void> {
-    try {
-      await this.messagesService.fetchMessages();
-    } catch (error) {
-        this.onLogout();
-    }
-  }
-  
+
   async onLogout() {
     this.messagesService.clear();
     await this.authenticationService.logout();
