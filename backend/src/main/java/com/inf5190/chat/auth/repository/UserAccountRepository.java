@@ -24,9 +24,9 @@ public class UserAccountRepository {
         return account.toObject(FirestoreUserAccount.class);
     }
 
-    public void createUserAccount(FirestoreUserAccount userAccount) throws InterruptedException, ExecutionException {
+    public void setUserAccount(FirestoreUserAccount userAccount) throws InterruptedException, ExecutionException {
         ApiFuture<WriteResult> future = this.firestore.collection(COLLECTION_NAME).document(userAccount.getUsername())
-                .create(userAccount);
+                .set(userAccount);
         future.get();
     }
 }
