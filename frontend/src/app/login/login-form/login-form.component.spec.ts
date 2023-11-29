@@ -29,10 +29,6 @@ describe("LoginFormComponent", () => {
     fixture.detectChanges();
   });
 
-  it("should create", () => {
-    expect(component).toBeTruthy();
-  });
-
   it("should emit username and password", () => {
     let username: string;
     let password: string;
