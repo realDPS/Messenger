@@ -5,11 +5,18 @@ import { By } from "@angular/platform-browser";
  * Classe de test qui aide à aller chercher des éléments HTML de la page.
  *
  * Elle utilise l'attribut `data-testid=` pour sélectionner les éléments.
+ * Par exemple:
+ *      <input
+ *        name="username"
+ *        type="text"
+ *        formControlName="username"
+ *        data-testid="username-input"
+ *      />
  */
 export class TestHelper<T> {
   constructor(private fixture: ComponentFixture<T>) {}
 
-  getInput(testid: string) {
+  getInput(testid: string): HTMLInputElement {
     return this.fixture.debugElement.query(
       By.css(`input[data-testid="${testid}"]`)
     ).nativeElement;
@@ -26,7 +33,7 @@ export class TestHelper<T> {
       .map((d) => d.nativeElement);
   }
 
-  getButton(testid: string) {
+  getButton(testid: string): HTMLButtonElement {
     return this.fixture.debugElement.query(
       By.css(`button[data-testid="${testid}"]`)
     ).nativeElement;
