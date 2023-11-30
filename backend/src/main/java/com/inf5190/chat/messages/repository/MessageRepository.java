@@ -12,7 +12,6 @@ import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.Query;
-import com.google.firebase.cloud.FirestoreClient;
 
 import com.inf5190.chat.messages.model.Message;
 import com.inf5190.chat.messages.model.NewMessageRequest;
@@ -34,7 +33,14 @@ public class MessageRepository {
     private static final String BUCKET_NAME = "app-chat-a23.appspot.com";
     private static final int DEFAULT_LIMIT = 20;
 
-    private final Firestore firestore = FirestoreClient.getFirestore();
+    private final Firestore firestore;
+    private final StorageClient storageClient;
+
+    // Nouveau constructeur.
+    public MessageRepository(Firestore firestore, StorageClient storageClient) {
+        this.firestore = firestore;
+        this.storageClient = storageClient;
+    }
 
     public List<Message> getMessages(String fromId) throws InterruptedException, ExecutionException {
         Query messageQuery = this.firestore.collection(COLLECTION_NAME).orderBy("timestamp");
@@ -59,7 +65,7 @@ public class MessageRepository {
 
         String imageUrl = null;
         if (message.imageData() != null) {
-            Bucket b = StorageClient.getInstance().bucket(BUCKET_NAME);
+            Bucket b = storageClient.bucket(BUCKET_NAME); // Use the injected StorageClient
             String path = String.format("images/%s.%s", ref.getId(), message.imageData().type());
             b.create(path, Decoders.BASE64.decode(message.imageData().data()),
                     BlobTargetOption.predefinedAcl(PredefinedAcl.PUBLIC_READ));
