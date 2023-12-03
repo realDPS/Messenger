@@ -43,7 +43,28 @@ describe("AuthenticationService", () => {
       await loginPromise;
     });
 
-    it("should store and emit the username", async () => {});
+    it("should store and emit the username", async () => {
+      const loginPromise = service.login(loginData);
+
+      const req = httpTestingController.expectOne(
+        `${environment.backendUrl}/auth/login`
+      );
+      expect(req.request.method).toBe("POST");
+      expect(req.request.body).toEqual(loginData);
+      req.flush({ username: loginData.username });
+
+      // wait for the login to complete
+      await loginPromise;
+
+      // Vérifie que le username est dans localStorage.
+      expect(localStorage.getItem(AuthenticationService.KEY)).toBe(
+        loginData.username
+      );
+
+      // Vérifie que le username est emitted.
+      const emittedUsername = await firstValueFrom(service.getUsername());
+      expect(emittedUsername).toBe(loginData.username);
+    });
   });
 
   describe("on logout", () => {
@@ -67,6 +88,26 @@ describe("AuthenticationService", () => {
       await logoutPromise;
     });
 
-    it("should remove the username from the service and local storage", async () => {});
+    it("should remove the username from the service and local storage", async () => {
+      localStorage.setItem(AuthenticationService.KEY, loginData.username);
+
+      const logoutPromise = service.logout();
+
+      const req = httpTestingController.expectOne(
+        `${environment.backendUrl}/auth/logout`
+      );
+      expect(req.request.method).toBe("POST");
+      req.flush({});
+
+      // wait for the logout to complete
+      await logoutPromise;
+
+      // Vérifie que le username n'est plus dans le localStorage.
+      expect(localStorage.getItem(AuthenticationService.KEY)).toBeNull();
+
+      // Vérifie que le username emitted est null.
+      const emittedUsername = await firstValueFrom(service.getUsername());
+      expect(emittedUsername).toBeNull();
+    });
   });
 });
