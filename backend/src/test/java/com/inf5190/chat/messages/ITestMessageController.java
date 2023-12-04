@@ -101,6 +101,40 @@ public class ITestMessageController {
         }
 
         @Test
+        public void getMessagesWithInvalidToken() {
+                String invalidToken = "invalidToken";
+
+                // Creation d'un header
+                HttpHeaders headers = createHeadersWithSessionCookie(invalidToken);
+                HttpEntity<Object> requestEntity = new HttpEntity<>(headers);
+
+                // GET requete au endpoint avec tokken(jeton) invalide
+                ResponseEntity<String> response = restTemplate.exchange(
+                                messagesEndpointUrl,
+                                HttpMethod.GET,
+                                requestEntity,
+                                String.class);
+
+                assertThat(response.getStatusCodeValue()).isEqualTo(403);
+        }
+
+        @Test
+        public void createMessageWithInvalidToken() {
+                String invalidToken = "invalidToken";
+                HttpHeaders headers = createHeadersWithSessionCookie(invalidToken);
+                NewMessageRequest newMessageRequest = new NewMessageRequest("username", "Hello World!", null);
+
+                // POST requete avec jeton invalide
+                ResponseEntity<String> response = restTemplate.postForEntity(
+                                messagesEndpointUrl,
+                                newMessageRequest,
+                                String.class,
+                                headers);
+
+                assertThat(response.getStatusCodeValue()).isEqualTo(403);
+        }
+
+        @Test
         public void getMessages() {
                 final String sessionCookie = this.login();
 
@@ -190,4 +224,48 @@ public class ITestMessageController {
                                 "You need to set FIREBASE_STORAGE_EMULATOR_HOST=localhost:9199 in your system properties.")
                                 .isNotEmpty();
         }
+
+        @Test
+        public void getMessagesWithFromId() {
+                final String sessionCookie = this.login();
+
+                final HttpHeaders header = this.createHeadersWithSessionCookie(sessionCookie);
+                final HttpEntity<Object> headers = new HttpEntity<>(header);
+                final ResponseEntity<Message[]> response = this.restTemplate.exchange(
+                                this.messagesEndpointUrl + "?fromId=1",
+                                HttpMethod.GET, headers, Message[].class);
+
+                assertThat(response.getStatusCodeValue()).isEqualTo(200);
+                assertThat(response.getBody()).isNotNull();
+                assertThat(response.getBody().length).isEqualTo(1); // 1 message dans la reponse
+        }
+
+        @Test
+        public void getMessagesWithoutFromId() {
+                final String sessionCookie = this.login();
+
+                final HttpHeaders header = this.createHeadersWithSessionCookie(sessionCookie);
+                final HttpEntity<Object> headers = new HttpEntity<>(header);
+                final ResponseEntity<Message[]> response = this.restTemplate.exchange(
+                                this.messagesEndpointUrl,
+                                HttpMethod.GET, headers, Message[].class);
+
+                assertThat(response.getStatusCodeValue()).isEqualTo(200);
+                assertThat(response.getBody()).isNotNull();
+                assertThat(response.getBody().length).isEqualTo(1); // 1 message dans la reponse
+        }
+
+        @Test
+        public void getMessagesWithInvalidFromId() {
+                final String sessionCookie = this.login();
+
+                final HttpHeaders header = this.createHeadersWithSessionCookie(sessionCookie);
+                final HttpEntity<Object> headers = new HttpEntity<>(header);
+                final ResponseEntity<Message[]> response = this.restTemplate.exchange(
+                                this.messagesEndpointUrl + "?fromId=invalidId",
+                                HttpMethod.GET, headers, Message[].class);
+
+                assertThat(response.getStatusCodeValue()).isEqualTo(404);
+        }
+
 }
