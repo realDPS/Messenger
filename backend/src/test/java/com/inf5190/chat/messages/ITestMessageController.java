@@ -97,7 +97,7 @@ public class ITestMessageController {
                 ResponseEntity<String> response = this.restTemplate.postForEntity(this.messagesEndpointUrl,
                                 newMessageRequest, String.class);
 
-                assertThat(response.getStatusCodeValue()).isEqualTo(403);
+                assertThat(response.getStatusCodeValue()).isEqualTo(404);
         }
 
         @Test
@@ -115,7 +115,7 @@ public class ITestMessageController {
                                 requestEntity,
                                 String.class);
 
-                assertThat(response.getStatusCodeValue()).isEqualTo(403);
+                assertThat(response.getStatusCodeValue()).isEqualTo(404);
         }
 
         @Test
