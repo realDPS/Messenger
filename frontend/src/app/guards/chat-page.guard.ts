@@ -1,10 +1,9 @@
-import { CanActivateFn, Router } from '@angular/router';
-import { inject } from '@angular/core';
+import { inject } from "@angular/core";
+import { CanActivateFn, Router } from "@angular/router";
+import { AuthenticationService } from "../login/authentication.service";
 
 export const chatPageGuard: CanActivateFn = (route, state) => {
-  if (localStorage.getItem("username") != null) {
-    return true; 
-  } else {
-    return inject(Router).parseUrl("/");
-  }
+  return inject(AuthenticationService).isConnected()
+    ? true
+    : inject(Router).parseUrl("/login");
 };

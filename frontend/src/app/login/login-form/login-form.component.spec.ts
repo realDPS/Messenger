@@ -33,99 +33,121 @@ describe("LoginFormComponent", () => {
     let username: string;
     let password: string;
 
-    // On s'abonne à l'EventEmitter pour recevoir les valeurs émises.
     component.login.subscribe((event) => {
       username = event.username;
       password = event.password;
     });
 
-    // On rempli le formulaire et initie le spy.
-    const addSpy = spyOn(component.login, "emit").and.callThrough();
-    const usernameInput = testHelper.getInput("username-input");
-    const passwordInput = testHelper.getInput("password-input");
-    testHelper.writeInInput(usernameInput, "username");
-    testHelper.writeInInput(passwordInput, "pwd");
+    writeUsername("username");
+    writePassword("pwd");
 
-    // On simule le onLogin.
-    component.onLogin();
+    clickLoginButton();
 
-    // Validation.
     expect(username!).toBe("username");
     expect(password!).toBe("pwd");
     expect(component.loginForm.valid).toBe(true);
-    expect(addSpy).toHaveBeenCalled();
   });
 
-  it("should not emit when username is not present", () => {
+  it("should not emit if username and password are both empty", () => {
     let username: string;
     let password: string;
 
-    // On s'abonne à l'EventEmitter pour recevoir les valeurs émises.
     component.login.subscribe((event) => {
       username = event.username;
       password = event.password;
     });
 
-    // On rempli le formulaire et initie le spy.
-    const addSpy = spyOn(component.login, "emit").and.callThrough();
-    const passwordInput = testHelper.getInput("password-input");
-    testHelper.writeInInput(passwordInput, "pwd");
+    clickLoginButton();
 
-    // On simule le onLogin.
-    component.onLogin();
-
-    // Validation.
     expect(username!).toBeUndefined();
     expect(password!).toBeUndefined();
     expect(component.loginForm.valid).toBe(false);
-    expect(addSpy).not.toHaveBeenCalled();
   });
 
-  it("should not emit when password is not present", () => {
+  it("should not emit if username is empty", () => {
     let username: string;
     let password: string;
 
-    // On s'abonne à l'EventEmitter pour recevoir les valeurs émises.
     component.login.subscribe((event) => {
       username = event.username;
       password = event.password;
     });
 
-    // On rempli le formulaire et initie le spy.
-    const addSpy = spyOn(component.login, "emit").and.callThrough();
+    writePassword("pwd");
+
+    clickLoginButton();
+
+    expect(username!).toBeUndefined();
+    expect(password!).toBeUndefined();
+    expect(component.loginForm.valid).toBe(false);
+  });
+
+  it("should not emit if password is empty", () => {
+    let username: string;
+    let password: string;
+
+    component.login.subscribe((event) => {
+      username = event.username;
+      password = event.password;
+    });
+
+    writeUsername("username");
+
+    clickLoginButton();
+
+    expect(username!).toBeUndefined();
+    expect(password!).toBeUndefined();
+    expect(component.loginForm.valid).toBe(false);
+  });
+
+  it("should not show error message if username and password are present", () => {
+    writeUsername("username");
+    writePassword("pwd");
+
+    clickLoginButton();
+
+    fixture.detectChanges();
+
+    const usernameErrorMessage = testHelper.getElement("username-error");
+    expect(usernameErrorMessage).toBeUndefined();
+    const passwordErrorMessage = testHelper.getElement("password-error");
+    expect(passwordErrorMessage).toBeUndefined();
+  });
+
+  it("should show error message if username is missing", () => {
+    writePassword("pwd");
+
+    clickLoginButton();
+
+    fixture.detectChanges();
+
+    const errorMessage = testHelper.getElement("username-error");
+    expect(errorMessage).toBeDefined();
+  });
+
+  it("should show error message if password is missing", () => {
+    writeUsername("username");
+
+    clickLoginButton();
+
+    fixture.detectChanges();
+
+    const errorMessage = testHelper.getElement("password-error");
+    expect(errorMessage).toBeDefined();
+  });
+
+  function writeUsername(username: string) {
     const usernameInput = testHelper.getInput("username-input");
-    testHelper.writeInInput(usernameInput, "username");
+    testHelper.writeInInput(usernameInput, username);
+  }
 
-    // On simule le onLogin.
-    component.onLogin();
+  function writePassword(password: string) {
+    const passwordInput = testHelper.getInput("password-input");
+    testHelper.writeInInput(passwordInput, password);
+  }
 
-    // Validation.
-    expect(username!).toBeUndefined();
-    expect(password!).toBeUndefined();
-    expect(component.loginForm.valid).toBe(false);
-    expect(addSpy).not.toHaveBeenCalled();
-  });
-
-  it("should not emit when both username and password are not present", () => {
-    let username: string;
-    let password: string;
-
-    // On s'abonne à l'EventEmitter pour recevoir les valeurs émises.
-    component.login.subscribe((event) => {
-      username = event.username;
-      password = event.password;
-    });
-
-    // On initie le spy.
-    const addSpy = spyOn(component.login, "emit").and.callThrough();
-
-    // On simule le onLogin.
-    component.onLogin();
-
-    // Validation.
-    expect(username!).toBeUndefined();
-    expect(password!).toBeUndefined();
-    expect(component.loginForm.valid).toBe(false);
-    expect(addSpy).not.toHaveBeenCalled();
-  });
+  function clickLoginButton() {
+    const button = testHelper.getButton("login-button");
+    button.click();
+  }
 });

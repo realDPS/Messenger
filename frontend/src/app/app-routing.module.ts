@@ -6,7 +6,7 @@ import { loginPageGuard } from "./guards/login-page.guard";
 import { chatPageGuard } from "./guards/chat-page.guard";
 
 const routes: Routes = [
-  { path: "chat", component: ChatPageComponent,canActivate: [chatPageGuard] },
+  { path: "chat", component: ChatPageComponent, canActivate: [chatPageGuard] },
   { path: "**", component: LoginPageComponent, canActivate: [loginPageGuard] },
 ];
 

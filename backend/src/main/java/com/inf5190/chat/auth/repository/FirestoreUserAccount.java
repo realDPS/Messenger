@@ -1,7 +1,5 @@
 package com.inf5190.chat.auth.repository;
 
-import java.util.Objects;
-
 public class FirestoreUserAccount {
     private String username;
     private String encodedPassword;
@@ -31,26 +29,38 @@ public class FirestoreUserAccount {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || getClass() != o.getClass())
-            return false;
-        FirestoreUserAccount that = (FirestoreUserAccount) o;
-        return Objects.equals(username, that.username) &&
-                Objects.equals(encodedPassword, that.encodedPassword);
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((username == null) ? 0 : username.hashCode());
+        result = prime * result + ((encodedPassword == null) ? 0 : encodedPassword.hashCode());
+        return result;
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(username, encodedPassword);
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        FirestoreUserAccount other = (FirestoreUserAccount) obj;
+        if (username == null) {
+            if (other.username != null)
+                return false;
+        } else if (!username.equals(other.username))
+            return false;
+        if (encodedPassword == null) {
+            if (other.encodedPassword != null)
+                return false;
+        } else if (!encodedPassword.equals(other.encodedPassword))
+            return false;
+        return true;
     }
 
     @Override
     public String toString() {
-        return "FirestoreUserAccount{" +
-                "username='" + username + '\'' +
-                ", encodedPassword='" + encodedPassword + '\'' +
-                '}';
+        return "FirestoreUserAccount [username=" + username + ", encodedPassword=" + encodedPassword + "]";
     }
 }

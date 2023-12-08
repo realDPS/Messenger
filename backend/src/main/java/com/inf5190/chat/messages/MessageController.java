@@ -5,11 +5,13 @@ import com.inf5190.chat.auth.session.SessionData;
 import com.inf5190.chat.auth.session.SessionManager;
 import com.inf5190.chat.messages.model.Message;
 import com.inf5190.chat.messages.model.NewMessageRequest;
+import com.inf5190.chat.messages.repository.DocumentNotFoundException;
 import com.inf5190.chat.messages.repository.MessageRepository;
 import com.inf5190.chat.websocket.WebSocketManager;
 
 import java.util.List;
 import java.util.Optional;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,7 +33,8 @@ public class MessageController {
     private final SessionManager sessionManager;
 
     public MessageController(MessageRepository messageRepository,
-            WebSocketManager webSocketManager, SessionManager sessionManager) {
+            WebSocketManager webSocketManager,
+            SessionManager sessionManager) {
         this.messageRepository = messageRepository;
         this.webSocketManager = webSocketManager;
         this.sessionManager = sessionManager;
@@ -41,11 +44,12 @@ public class MessageController {
     public List<Message> getMessages(@RequestParam Optional<String> fromId) {
         try {
             return this.messageRepository.getMessages(fromId.orElse(null));
+        } catch (DocumentNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         } catch (ResponseStatusException e) {
             throw e;
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Unexpected error on get messages.");
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error on get message.");
         }
     }
 
@@ -70,8 +74,7 @@ public class MessageController {
         } catch (ResponseStatusException e) {
             throw e;
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Unexpected error on create message.");
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error on create message.");
         }
     }
 }

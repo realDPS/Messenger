@@ -5,6 +5,7 @@ import { MessagesService } from "../messages.service";
 import { Router } from "@angular/router";
 import { WebSocketEvent, WebSocketService } from "../websocket.service";
 import { FileReaderService } from "../file-reader.service";
+import { HttpErrorResponse } from "@angular/common/http";
 
 @Component({
   selector: "app-chat-page",
@@ -34,7 +35,7 @@ export class ChatPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-        this.notifications$ = this.webSocketService.connect();
+    this.notifications$ = this.webSocketService.connect();
     this.notificationsSubscription = this.notifications$.subscribe(() => {
       this.fetchMessages();
     });
@@ -65,21 +66,33 @@ export class ChatPageComponent implements OnInit, OnDestroy {
           imageData: imageData,
         });
       } catch (error) {
-        this.onLogout();
+        if (error instanceof HttpErrorResponse && error.status === 403) {
+          await this.onLogout();
+        } else {
+          console.error("Impossible d'envoyer le message.");
+        }
       }
     }
   }
-  async fetchMessages(): Promise<void> {
+
+  async onLogout() {
+    try {
+      await this.authenticationService.logout();
+    } finally {
+      this.messagesService.clear();
+      this.router.navigate(["/"]);
+    }
+  }
+
+  private async fetchMessages() {
     try {
       await this.messagesService.fetchMessages();
     } catch (error) {
-        this.onLogout();
+      if (error instanceof HttpErrorResponse && error.status === 403) {
+        await this.onLogout();
+      } else {
+        console.error("Impossible de charger les messages.");
+      }
     }
-  }
-  
-  async onLogout() {
-    this.messagesService.clear();
-    await this.authenticationService.logout();
-    this.router.navigate(["/"]);
   }
 }

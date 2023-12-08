@@ -9,11 +9,9 @@ import { UserCredentials } from "../model/user-credentials";
 })
 export class LoginFormComponent implements OnInit {
   loginForm = this.fb.group({
-    username: [null, [Validators.required]],
-    password: [
-      null,[Validators.required]],
+    username: ["", Validators.required],
+    password: ["", Validators.required],
   });
-  
 
   @Output()
   login = new EventEmitter<UserCredentials>();
@@ -32,21 +30,24 @@ export class LoginFormComponent implements OnInit {
         username: this.loginForm.value.username,
         password: this.loginForm.value.password,
       });
+    } else {
+      this.loginForm.markAllAsTouched();
     }
   }
-  showNameRequiredError(): boolean {
-    return this.showError("username", "required");
-  }
-  showPasswordRequiredError(): boolean {
-    return this.showError("password", "required");
+
+  showMissingUsername() {
+    return this.showMissing("username");
   }
 
+  showMissingPassword() {
+    return this.showMissing("password");
+  }
 
-  private showError(field: "username" | "password", error: string): boolean {
+  private showMissing(controlName: string) {
     return (
-      this.loginForm.controls[field].hasError(error) &&
-      (this.loginForm.controls[field].dirty || this.loginForm.controls[field].touched)
+      this.loginForm.get(controlName)?.hasError("required") &&
+      (this.loginForm.get(controlName)?.dirty ||
+        this.loginForm.get(controlName)?.touched)
     );
   }
-
 }

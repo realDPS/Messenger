@@ -18,9 +18,7 @@ import com.inf5190.chat.messages.model.NewMessageRequest;
 
 import io.jsonwebtoken.io.Decoders;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.server.ResponseStatusException;
 
 /**
  * Classe qui gère la persistence des messages.
@@ -36,7 +34,6 @@ public class MessageRepository {
     private final Firestore firestore;
     private final StorageClient storageClient;
 
-    // Nouveau constructeur.
     public MessageRepository(Firestore firestore, StorageClient storageClient) {
         this.firestore = firestore;
         this.storageClient = storageClient;
@@ -48,7 +45,7 @@ public class MessageRepository {
         if (fromId != null) {
             DocumentSnapshot fromIdDocument = this.firestore.collection(COLLECTION_NAME).document(fromId).get().get();
             if (!fromIdDocument.exists()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Message with id " + fromId + " not found.");
+                throw new DocumentNotFoundException("Document with id " + fromId + " not found.");
             }
             messageQuery = messageQuery.startAfter(fromIdDocument);
         } else {
@@ -65,7 +62,7 @@ public class MessageRepository {
 
         String imageUrl = null;
         if (message.imageData() != null) {
-            Bucket b = storageClient.bucket(BUCKET_NAME); // Use the injected StorageClient
+            Bucket b = this.storageClient.bucket(BUCKET_NAME);
             String path = String.format("images/%s.%s", ref.getId(), message.imageData().type());
             b.create(path, Decoders.BASE64.decode(message.imageData().data()),
                     BlobTargetOption.predefinedAcl(PredefinedAcl.PUBLIC_READ));

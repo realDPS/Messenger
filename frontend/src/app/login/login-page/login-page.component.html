@@ -1,6 +1,4 @@
 <div>
   <app-login-form (login)="onLogin($event)"></app-login-form>
-  <div><mat-error *ngIf="error403">Mot de passe invalide</mat-error></div>
-  <div><mat-error *ngIf="error40x">Problème de connexion</mat-error></div>
-
+  <h3 *ngIf="loginErrorMessage" class="error">{{ loginErrorMessage }}</h3>
 </div>

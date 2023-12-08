@@ -18,10 +18,6 @@ import com.inf5190.chat.auth.session.SessionManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -55,6 +51,25 @@ public class TestAuthController {
     }
 
     @Test
+    public void loginNoExistingUserAccount() throws InterruptedException, ExecutionException {
+        final SessionData expectedSessionData = new SessionData(this.username);
+        final String expectedUsername = this.username;
+
+        when(this.mockAccountRepository.getUserAccount(this.username)).thenReturn(null);
+        when(this.mockPasswordEncoder.encode(this.password)).thenReturn(this.hashedPassword);
+        when(this.mockSessionManager.addSession(expectedSessionData)).thenReturn(expectedUsername);
+
+        ResponseEntity<LoginResponse> response = this.authController.login(loginRequest);
+        assertThat(response.getStatusCodeValue()).isEqualTo(200);
+        assertThat(response.getBody().username()).isEqualTo(expectedUsername);
+
+        verify(this.mockAccountRepository, times(1)).getUserAccount(this.username);
+        verify(this.mockPasswordEncoder, times(1)).encode(this.password);
+        verify(this.mockAccountRepository).createUserAccount(this.userAccount);
+        verify(this.mockSessionManager, times(1)).addSession(expectedSessionData);
+    }
+
+    @Test
     public void loginExistingUserAccountWithCorrectPassword() throws InterruptedException, ExecutionException {
         final SessionData expectedSessionData = new SessionData(this.username);
         final String expectedUsername = this.username;
@@ -73,54 +88,21 @@ public class TestAuthController {
     }
 
     @Test
-    public void loginNonExistingUserAccount() throws InterruptedException, ExecutionException {
-        final SessionData expectedSessionData = new SessionData(this.username);
-        final String expectedUsername = this.username;
+    public void loginExitingUserAccountWithWrongPassword() throws InterruptedException, ExecutionException {
+        when(this.mockAccountRepository.getUserAccount(loginRequest.username())).thenReturn(userAccount);
+        when(this.mockPasswordEncoder.matches(loginRequest.password(), this.hashedPassword)).thenReturn(false);
 
-        when(this.mockAccountRepository.getUserAccount(loginRequest.username())).thenReturn(null);
-        when(this.mockPasswordEncoder.encode(loginRequest.password())).thenReturn("newHash");
-        when(this.mockSessionManager.addSession(expectedSessionData)).thenReturn(expectedUsername);
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> this.authController.login(loginRequest));
 
-        ResponseEntity<LoginResponse> response = this.authController.login(loginRequest);
-        assertThat(response.getStatusCodeValue()).isEqualTo(200);
-        assertThat(response.getBody().username()).isEqualTo(expectedUsername);
-
-        verify(this.mockAccountRepository, times(1)).createUserAccount(any(FirestoreUserAccount.class));
-        verify(this.mockSessionManager, times(1)).addSession(eq(expectedSessionData));
-    }
-
-    @Test
-    public void loginExistingUserWithIncorrectPassword() throws InterruptedException, ExecutionException {
-        final String existingUsername = "existingUser";
-        final String incorrectPassword = "incorrectPassword";
-
-        when(this.mockAccountRepository.getUserAccount(existingUsername))
-                .thenReturn(new FirestoreUserAccount(existingUsername, "correctHashedPassword"));
-        when(this.mockPasswordEncoder.matches(incorrectPassword, "correctHashedPassword")).thenReturn(false);
-
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-                () -> this.authController.login(new LoginRequest(existingUsername, incorrectPassword)));
-        assertThat(exception.getStatus().value()).isEqualTo(403);
-
-        verify(this.mockAccountRepository, times(1)).getUserAccount(existingUsername);
-        verify(this.mockPasswordEncoder, times(1)).matches(incorrectPassword, "correctHashedPassword");
-        verify(this.mockSessionManager, never()).addSession(any(SessionData.class));
+        assertThat(exception.getRawStatusCode()).isEqualTo(403);
     }
 
     @Test
     public void loginUnexpectedException() throws InterruptedException, ExecutionException {
-        final String existingUsername = "existingUser";
-        final String correctPassword = "correctPassword";
+        when(this.mockAccountRepository.getUserAccount(loginRequest.username())).thenThrow(new RuntimeException("erreur"));
 
-        when(this.mockAccountRepository.getUserAccount(existingUsername))
-                .thenThrow(new RuntimeException("Simulated unexpected exception"));
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> this.authController.login(loginRequest));
 
-        RuntimeException exception = assertThrows(RuntimeException.class,
-                () -> this.authController.login(new LoginRequest(existingUsername, correctPassword)));
-        assertThat(exception.getMessage()).isEqualTo("Simulated unexpected exception");
-
-        verify(this.mockAccountRepository, times(1)).getUserAccount(existingUsername);
-        verify(this.mockPasswordEncoder, never()).matches(anyString(), anyString());
-        verify(this.mockSessionManager, never()).addSession(any(SessionData.class));
+        assertThat(exception.getRawStatusCode()).isEqualTo(500);
     }
 }

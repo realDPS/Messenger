@@ -2,7 +2,6 @@ package com.inf5190.chat.messages.repository;
 
 import com.google.cloud.Timestamp;
 import com.google.cloud.firestore.annotation.DocumentId;
-import java.util.Objects;
 
 public class FirestoreMessage {
     @DocumentId
@@ -60,32 +59,57 @@ public class FirestoreMessage {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || getClass() != o.getClass())
-            return false;
-        FirestoreMessage that = (FirestoreMessage) o;
-        return Objects.equals(id, that.id) &&
-                Objects.equals(username, that.username) &&
-                Objects.equals(timestamp, that.timestamp) &&
-                Objects.equals(text, that.text) &&
-                Objects.equals(imageUrl, that.imageUrl);
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        result = prime * result + ((username == null) ? 0 : username.hashCode());
+        result = prime * result + ((timestamp == null) ? 0 : timestamp.hashCode());
+        result = prime * result + ((text == null) ? 0 : text.hashCode());
+        result = prime * result + ((imageUrl == null) ? 0 : imageUrl.hashCode());
+        return result;
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(id, username, timestamp, text, imageUrl);
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        FirestoreMessage other = (FirestoreMessage) obj;
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        } else if (!id.equals(other.id))
+            return false;
+        if (username == null) {
+            if (other.username != null)
+                return false;
+        } else if (!username.equals(other.username))
+            return false;
+        if (timestamp == null) {
+            if (other.timestamp != null)
+                return false;
+        } else if (!timestamp.equals(other.timestamp))
+            return false;
+        if (text == null) {
+            if (other.text != null)
+                return false;
+        } else if (!text.equals(other.text))
+            return false;
+        if (imageUrl == null) {
+            if (other.imageUrl != null)
+                return false;
+        } else if (!imageUrl.equals(other.imageUrl))
+            return false;
+        return true;
     }
 
     @Override
     public String toString() {
-        return "FirestoreMessage{" +
-                "id='" + id + '\'' +
-                ", username='" + username + '\'' +
-                ", timestamp=" + timestamp +
-                ", text='" + text + '\'' +
-                ", imageUrl='" + imageUrl + '\'' +
-                '}';
+        return "FirestoreMessage [id=" + id + ", username=" + username + ", timestamp=" + timestamp + ", text=" + text
+                + ", imageUrl=" + imageUrl + "]";
     }
 }
