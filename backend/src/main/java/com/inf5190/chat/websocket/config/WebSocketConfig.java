@@ -19,7 +19,7 @@ import com.inf5190.chat.websocket.WebSocketManager;
 public class WebSocketConfig implements WebSocketConfigurer {
 
     @Value("${cors.allowedOrigins}")
-    private String allowedOrigins;
+    private String[] allowedOrigins;
 
     private final WebSocketManager webSocketManager;
 
@@ -31,6 +31,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         // Enregistre le handler pour chaque connexion websocket.
         registry.addHandler(new WebSocketHandler(this.webSocketManager), "/notifications")
-                .setAllowedOriginPatterns(this.allowedOrigins.split(","));
+                .setAllowedOriginPatterns(this.allowedOrigins[0].split(","))
+                .setAllowedOriginPatterns(this.allowedOrigins[1].split(","));
     }
 }
