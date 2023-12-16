@@ -71,7 +71,7 @@ public class MessageRepository {
             String path = String.format("images/%s.%s", ref.getId(), message.imageData().type());
             b.create(path, Decoders.BASE64.decode(message.imageData().data()),
                     BlobTargetOption.predefinedAcl(PredefinedAcl.PUBLIC_READ));
-            imageUrl = String.format("storage.googleapis.com/%s/%s", storageBucketName, path);
+            imageUrl = String.format("https://storage.googleapis.com/%s/%s", storageBucketName, path);
         }
 
         FirestoreMessage firestoreMessage = new FirestoreMessage(
